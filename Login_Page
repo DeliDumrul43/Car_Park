@@ -1,0 +1,80 @@
+public void kontrol()
+        {
+            if (checkBox1.Checked == true)
+            {
+                textBox2.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                textBox2.UseSystemPasswordChar = true;
+            }
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+            
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void textBox2_TextChanged_1(object sender, EventArgs e)
+        {
+            kontrol();
+
+        }
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            kontrol();
+
+        }
+
+        private void label4_Click_1(object sender, EventArgs e)
+        {
+            Forgot frm7 = new Forgot();
+            frm7.Show();
+            this.Hide();
+        }
+
+        private void label3_Click_1(object sender, EventArgs e)
+        {
+            MainMenu MainMenu = new MainMenu();
+
+
+            if (textBox1.Text == Register.user[1].ToString() && textBox2.Text == Register.user[2].ToString())
+            {
+                MessageBox.Show("Başarıyla giriş yaptınız", "UYARI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Hide();
+                MainMenu.Show();
+            }
+            else
+            {
+                MessageBox.Show("Kullanıcı Adı veya Şifre yanlış", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            }
+        }
+
+        private void Login_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult secenek = MessageBox.Show("Programı kapatmak istiyor musunuz?", "Bilgilendirme Penceresi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (secenek == DialogResult.No)
+            {
+                e.Cancel = true;
+                return;
+
+            }
+            Environment.Exit(0);
+        }
