@@ -1,0 +1,163 @@
+        OleDbConnection con;
+        OleDbCommand cmd;
+        OleDbDataReader dr;
+        static public ArrayList user = new ArrayList();
+        Login login = new Login();
+
+
+        public void kontrol()
+        {
+            if (checkBox1.Checked == true)
+            {
+                textBox2.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                textBox2.UseSystemPasswordChar = true;
+            }
+
+            if (checkBox1.Checked == true)
+            {
+                textBox3.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                textBox3.UseSystemPasswordChar = true;
+            }
+
+        }
+        
+        private void label1_Click_1(object sender, EventArgs e)
+        {
+            user.Clear();
+
+            try
+            {
+
+                if (textBox1.Text == "" || textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "" || textBox5.Text == "")
+                {
+                    MessageBox.Show("BOŞ ALAN BIRAKMAYINIZ", "UYARI", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    if (textBox2.Text == textBox3.Text)
+                    {
+
+                        con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=USERS.mdb");
+                        cmd = new OleDbCommand();
+                        con.Open();
+                        cmd.Connection = con;
+                        cmd.CommandText = "insert into USERS (Kullanici_adi,Kullanici_sifre,cevap,yer) values ('" + textBox1.Text + "','" + textBox2.Text + "','" + textBox4.Text + "','" + textBox5.Text + "')";
+                        cmd.ExecuteNonQuery();
+                        con.Close();
+                        con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=USERS.mdb");
+                        cmd = new OleDbCommand();
+                        con.Open();
+                        cmd.Connection = con;
+                        cmd.CommandText = "SELECT * FROM USERS";
+                        dr = cmd.ExecuteReader();
+                        while (dr.Read())
+                        {
+                            user.Add(dr["ID"]);
+                            user.Add(dr["Kullanici_adi"]);
+                            user.Add(dr["Kullanici_sifre"]);
+                            user.Add(dr["cevap"]);
+                            user.Add(dr["yer"]);
+
+                        }
+                        con.Close();
+                        MessageBox.Show("Başarı ile eklendi.", "Bildirim", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        timer1.Start();
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("ŞİFRELER UYUŞMADI", "HATA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
+            }
+            catch
+            {
+                MessageBox.Show("BEKLENMEDİK HATA", "HATA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        private void Register_Load(object sender, EventArgs e)
+        {
+            user.Clear();
+
+            try
+            {
+
+                this.Opacity = 100;
+                con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=USERS.mdb");
+                cmd = new OleDbCommand();
+                con.Open();
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT * FROM USERS";
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    user.Add(dr["ID"]);
+                    user.Add(dr["Kullanici_adi"]);
+                    user.Add(dr["Kullanici_sifre"]);
+                    user.Add(dr["cevap"]);
+                    user.Add(dr["yer"]);
+                }
+                con.Close();
+                if (user.Count == 5)
+                {
+                    timer1.Start();            
+                }
+
+            }
+            catch
+            {
+                MessageBox.Show("Veritabanına Bağlanırken Hata Oluştu Kontrol Ediniz!!", "HATA", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
+            }
+        }
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            kontrol();
+        }
+
+        private void textBox2_TextChanged_1(object sender, EventArgs e)
+        {
+            kontrol();
+
+        }
+
+        private void textBox3_TextChanged_1(object sender, EventArgs e)
+        {
+            kontrol();
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Login asd = new Login();
+            this.Hide();
+            login.Show();
+            timer1.Stop();
+        }
+
+        private void Register_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult secenek = MessageBox.Show("Programı kapatmak istiyor musunuz?", "Bilgilendirme Penceresi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (secenek == DialogResult.No)
+            {
+                e.Cancel = true;
+                return;
+
+            }
+            Environment.Exit(0);
+        }
+
+        private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
