@@ -1,0 +1,444 @@
+        OleDbConnection con;
+        OleDbCommand cmd;
+        OleDbDataReader dr;
+        OleDbDataAdapter da;
+        DataSet ds;
+        ArrayList plate = new ArrayList();
+        string dyol = "";
+        
+        ArrayList tarih = new ArrayList();
+        ArrayList telefon = new ArrayList();
+        ArrayList plaka = new ArrayList();
+        ArrayList yer = new ArrayList();
+        ArrayList sahip = new ArrayList();
+        ArrayList sahip_soyad = new ArrayList();
+        int a;
+        double ücret2;
+        public void temiz()
+        {
+            tarih.Clear();
+            telefon.Clear();
+            plaka.Clear();
+            yer.Clear();
+            sahip.Clear();
+            sahip_soyad.Clear();
+            dyol = "";
+            a = 0;
+            ücret2 = 0;
+        }
+
+        public void reset()
+        {
+            temiz();
+            try
+            {
+                con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Yol.mdb");
+                cmd = new OleDbCommand();
+                con.Open();
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT * FROM Yol";
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    dyol = dr["Yol"].ToString();
+
+                }
+                con.Close();
+                plate.Clear();
+
+                for (int i = 1; i < Convert.ToInt32(Register.user[4])+1; i++)
+                {
+                    comboBox1.Items.Add(i);
+                }
+                con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dyol);
+                cmd = new OleDbCommand();
+                con.Open();
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT * FROM CAR_PARK";
+                dr = cmd.ExecuteReader();
+                
+                while (dr.Read())
+                {
+                    plate.Add(dr["Yer"]);
+
+                }
+                con.Close();
+                for (int i = 0; i < plate.Count; i++)
+                {
+                    comboBox1.Items.RemoveAt(Convert.ToInt32(plate[i]) - 1);
+                    comboBox1.Items.Insert(Convert.ToInt32(plate[i]) - 1, plate[i].ToString() + " dolu");
+
+                }
+
+                progressBar1.Value = (100 / Convert.ToInt32(Register.user[4])) * Convert.ToInt16(plate.Count);
+                int rate = (100 / Convert.ToInt32(Register.user[4])) * Convert.ToInt16(plate.Count);
+                groupBox2.Text = "OCCUPANCY RATE %" + rate.ToString();
+
+            }
+            catch
+            {
+
+            }
+        }
+
+
+
+
+        private void cARToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            groupBox1.Visible = true;
+            groupBox2.Visible = true;
+            groupBox4.Visible = false;
+            groupBox1.Location = new Point(56, 32);
+            groupBox2.Location = new Point(56, 522);
+            groupBox3.Visible = false;
+            timer1.Start();
+            temiz();
+            reset();
+            timer2.Stop();
+            pictureBox1.Visible = false;
+
+
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void MainMenu_Load(object sender, EventArgs e)
+        {
+            groupBox1.Visible = false;
+            groupBox2.Visible = false;
+            groupBox3.Visible = false;
+            groupBox4.Visible = false;
+
+
+
+        }
+
+        private void eXİTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Visible = false;
+            groupBox1.Visible = false;
+            groupBox2.Visible = false;
+            groupBox3.Visible = true;
+            groupBox4.Visible = false;
+            groupBox3.Location = new Point(12, 31);
+
+            timer2.Start();
+            timer1.Stop();
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+
+                if (textBox1.Text == "" || textBox2.Text == "" || textBox3.Text == "" || textBox4.Text == "" || textBox5.Text == "" || comboBox1.Text == "")
+                {
+                    MessageBox.Show("BOŞ ALAN BIRAKMAYINIZ", "UYARI", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    if (Convert.ToInt32(comboBox1.Text) < Convert.ToInt32(Register.user[4])+1 && Convert.ToInt32(comboBox1.Text) > 0)
+                    {
+                        if (textBox3.Text.Length == 11)
+                        {
+                            con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dyol);
+                            cmd = new OleDbCommand();
+                            con.Open();
+                            cmd.Connection = con;
+                            cmd.CommandText = "insert into CAR_PARK (Yer,Sahip,Sahip_soyad,Giris,Telefon,Arac_plaka) values ('" + Convert.ToInt32(comboBox1.Text) + "','" + textBox1.Text + "','" + textBox2.Text + "','" + textBox5.Text + "','" + textBox3.Text + "','" + textBox4.Text + "')";
+                            cmd.ExecuteNonQuery();
+                            con.Close();
+                            MessageBox.Show("Başarı ile eklendi.", "Bildirim", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            comboBox1.Items.Clear();
+                            textBox1.Clear();
+                            textBox2.Clear();
+                            textBox3.Clear();
+                            textBox4.Clear();
+                            textBox5.Clear();
+                            comboBox1.Text = "";
+                            reset();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Düzgün bir telefon numarası giriniz", "Bildirim", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+
+
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Lütfen boş yer giriniz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Lütfen boş yer giriniz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            }
+        }
+
+        private void comboBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+        }
+
+        private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+
+            string degis = textBox4.Text.ToUpper();
+            textBox4.Text = degis;
+            textBox4.SelectionStart = textBox4.Text.Length;
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            temiz();
+
+            string degis = textBox6.Text.ToUpper();
+            textBox6.Text = degis;
+            textBox6.SelectionStart = textBox6.Text.Length;
+            try
+            {
+                con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Yol.mdb");
+                cmd = new OleDbCommand();
+                con.Open();
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT * FROM Yol";
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    dyol = dr["Yol"].ToString();
+
+                }
+                tarih.Clear();
+                telefon.Clear();
+                plaka.Clear();
+                yer.Clear();
+                sahip.Clear();
+                sahip_soyad.Clear();
+
+
+                con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dyol);
+                cmd = new OleDbCommand();
+                con.Open();
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT * FROM CAR_PARK";
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    telefon.Add(dr["Telefon"]).ToString();
+                    plaka.Add(dr["Arac_plaka"]).ToString();
+                    tarih.Add(dr["Giris"]).ToString();
+                    yer.Add(Convert.ToInt32(dr["Yer"]));
+                    sahip.Add(dr["sahip"]).ToString();
+                    sahip_soyad.Add(dr["sahip_soyad"]).ToString();
+
+
+
+                }
+                con.Close();
+
+                if (radioButton1.Checked == true)
+                {
+                    radioButton2.Checked = false;
+                    for (int i = 0; i < telefon.Count; i++)
+                    {
+                        if (textBox6.Text == telefon[i].ToString())
+                        {
+                            label9.Text = tarih[i].ToString();
+                            a = i;
+
+                        }
+                    }
+
+                }
+                else if (radioButton2.Checked == true)
+                {
+                    radioButton1.Checked = false;
+                    for (int i = 0; i < plaka.Count; i++)
+                    {
+                        if (textBox6.Text == plaka[i].ToString())
+                        {
+                            label9.Text = tarih[i].ToString();
+                            a = i;
+
+                        }
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Bir arama türü seçiniz", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+
+                int toplam_zaman = 0;
+                int cikis_zaman = 0;
+                DateTime ücret = Convert.ToDateTime(tarih[a]);
+                toplam_zaman += ücret.Second;
+                toplam_zaman += ücret.Minute * 60;
+                toplam_zaman += ücret.Hour * 60 * 60;
+                toplam_zaman += ücret.Day * 24 * 60 * 60;
+                toplam_zaman += ücret.Month * 30 * 24 * 60 * 60;
+                toplam_zaman += ücret.Year * 12 * 30 * 60 * 60;
+                ücret = Convert.ToDateTime(label10.Text);
+                cikis_zaman += ücret.Second;
+                cikis_zaman += ücret.Minute * 60;
+                cikis_zaman += ücret.Hour * 60 * 60;
+                cikis_zaman += ücret.Day * 24 * 60 * 60;
+                cikis_zaman += ücret.Month * 30 * 24 * 60 * 60;
+                cikis_zaman += ücret.Year * 12 * 30 * 60 * 60;
+                ücret2 = (((cikis_zaman - toplam_zaman) - (15 * 60)) / 60) * 1 / 60;
+                label8.Text = "Payment: " + ücret2.ToString() + " TL";
+                if (label9.Text != "")
+                {
+                    int sil = Convert.ToInt32(yer[a]);
+                    con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=archive.mdb");
+                    cmd = new OleDbCommand();
+                    con.Open();
+                    cmd.Connection = con;
+                    cmd.CommandText = "insert into archive (Yer,sahip,sahip_soyad,giris,telefon,plaka,cikis,ucret) values ('" + Convert.ToInt32(yer[a]) + "','" + sahip[a].ToString() + "','" + sahip_soyad[a].ToString() + "','" + label9.Text + "','" + telefon[a].ToString() + "','" + plaka[a].ToString() + "','" + label10.Text + "','" + ücret2.ToString() + "')";
+                    cmd.ExecuteNonQuery();
+                    con.Close();
+                    con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=CAR_PARK.mdb");
+
+                    cmd = new OleDbCommand();
+                    con.Open();
+                    cmd.Connection = con;
+                    cmd.CommandText = "delete from CAR_PARK where Yer=" + sil + "";
+                    cmd.ExecuteNonQuery();
+                    con.Close();
+                    MessageBox.Show("Çıkış Yapıldı!", "Bildirim", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    textBox6.Clear();
+                    label9.Text = "";
+                }
+
+
+
+            }
+            catch
+            {
+
+            }
+
+
+
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+        }
+
+        private void timer1_Tick_1(object sender, EventArgs e)
+        {
+            textBox5.Text = DateTime.Now.ToLocalTime().ToString();
+
+        }
+
+        private void textBox4_TextChanged_1(object sender, EventArgs e)
+        {
+            string degis = textBox4.Text.ToUpper();
+            textBox4.Text = degis;
+            textBox4.SelectionStart = textBox4.Text.Length;
+        }
+
+        private void timer2_Tick_1(object sender, EventArgs e)
+        {
+            label10.Text = DateTime.Now.ToLocalTime().ToString();
+
+        }
+
+        private void ıNSERTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            file.Filter = "Access Database (*.mdb)|*.mdb";
+            file.FilterIndex = 2;
+            file.RestoreDirectory = true;
+            file.CheckFileExists = false;
+            file.Title = "Pick access file";
+
+
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string DosyaYolu = file.FileName;
+                    string DosyaAdi = file.SafeFileName;
+                    con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Yol.mdb");
+                    cmd = new OleDbCommand();
+                    con.Open();
+                    cmd.Connection = con;
+                    cmd.CommandText = "update yol set yol='" + DosyaYolu + "' where Kimlik=" + 1 + "";
+                    cmd.ExecuteNonQuery();
+                    con.Close();
+                    MessageBox.Show("Başarı ile değiştirildi", "Bildirim", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch
+                {
+                    MessageBox.Show("Beklenmedik Hata", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+        }
+
+        private void archiveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Visible = false;
+
+            groupBox1.Visible = false;
+            groupBox2.Visible = false;
+            groupBox3.Visible = false;
+            groupBox4.Visible = true;
+            groupBox4.Location=new Point(26, 43);
+            fillgrid();
+
+        }
+
+        void fillgrid()
+        {
+            con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=archive.mdb");
+            da = new OleDbDataAdapter("SElect *from archive", con);
+            ds = new DataSet();
+            con.Open();
+            da.Fill(ds, "archive");
+            dataGridView1.DataSource = ds.Tables["archive"];
+            con.Close();
+
+        }
+
+        private void MainMenu_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult secenek = MessageBox.Show("Programı kapatmak istiyor musunuz?", "Bilgilendirme Penceresi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (secenek == DialogResult.No)
+            {
+                e.Cancel = true;
+                return;
+
+            }
+            Environment.Exit(0);
+            
+
+        }
